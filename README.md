@@ -4,8 +4,8 @@
    1.解决班级每天温度上报
    2.后台一键每日导出Excel表然后上报学院 (手机端访问后台可下载)
 ## 技术选型
-   Element-UI+SpringBoot+mysql 
-   界面部分:   
+   Element-UI+SpringBoot+mysql   
+   界面部分:  
    用户/后台  
    ![avatar](pics/user.png) ![avatar](pics/admin.png)  
    其他信息班级、姓名、性别、地址、手机这些提前录在数据库里,减少用户输入内容.  
