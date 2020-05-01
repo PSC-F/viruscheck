@@ -122,6 +122,14 @@
             <!--                            </el-button>-->
             <!--                        </el-row>-->
             </el-row>
+            <el-row>
+                <el-col :lg="{span:4,offset:10}" :xs="{span:20,offset:1}">
+                    <el-progress type="dashboard" :percentage="percentage" :color="colors"></el-progress>
+                </el-col>
+                <el-col :lg="{span:4,offset:10}" :xs="{span:20,offset:2}">
+                    <el-link icon="el-icon-school" style="font-family: 'Dubai Light';font-size:18px;">假期剩余</el-link>
+                </el-col>
+            </el-row>
 
         </el-main>
 
@@ -139,6 +147,12 @@
 
     new Vue({
         el: '#app',
+        created: function () {
+            console.log(`-created`);
+            let curDay = new Date().getDate();
+            curDay=30-curDay;
+            this.percentage = curDay * (100 / 30).toFixed(0);
+        },
         data: {
             radio: "1",
             isDisabl: true,
@@ -157,6 +171,15 @@
             dialogImageUrl: '',
             loading: false,
             imgQuality: 0.2,
+            percentage: 0,
+            colors: [
+                {color: '#f56c6c', percentage: 20},
+                {color: '#e6a23c', percentage: 40},
+                {color: '#5cb87a', percentage: 60},
+                {color: '#1989fa', percentage: 80},
+                {color: '#6f7ad3', percentage: 100}
+            ],
+
         },
         methods: {
             dataURItoBlob(dataURI, type) {

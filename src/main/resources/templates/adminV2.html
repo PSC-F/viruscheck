@@ -23,6 +23,7 @@
                                 @change="selectTime"
                                 v-model="value1"
                                 type="date"
+                                :default-value="defaultDate"
                                 placeholder="选择日期">
                         </el-date-picker>
                     </div>
@@ -94,6 +95,7 @@
                         </el-dialog>
                     </template>
                     <el-footer height="500px">
+                        <el-progress :percentage="percentage" :format="formatWithPercentage" status="success"></el-progress>
                         <el-button round type="danger" size="mini" plain @click="submitOtherQuery">未登记查询
                         </el-button>
                     </el-footer>
@@ -139,13 +141,20 @@ function dateFormat(fmt, date) {
 new Vue({
     el: '#app',
     data: {
-        value1: "",
+        value1: '',
         tableData: [],
         loading: false,
         dialogTableVisible:false,
         src:'test',
+        percentage:0,
+        defaultDate:new Date()
+        ,
     }
     , methods: {
+        formatWithPercentage(percentage) {
+            return percentage === 100 ? '采集完成' : `${percentage}%正在采集`;
+        }
+        ,
         handleEdit(index, row) {
             var temp = this;
           this.dialogTableVisible = true;
@@ -197,11 +206,12 @@ new Vue({
                     // console.log(tableData[0]);
                     alertMessage('温馨提醒: 上下可滑动');
                     temp.loading = false;
+                    var beforePercentage=temp.tableData.length;
+                    temp.percentage=beforePercentage * (100 / 30).toFixed(0);
                 })
                 .catch(function (error) {
                     console.log(error);
                     console.log("不存在");
-                    alertMessage('查询成功,表格可以滚动');
                 });
             var notify = this.$notify;
 
@@ -227,14 +237,11 @@ new Vue({
                 axios.post('/selectHealthByDay', {day: day})
                     .then(function (data) {
                         console.log("获取数据");
-                        // var jsonObj = JSON.parse(JSON.stringify(successResponse.data.data));
-                        // var data2=  eval(data.data.healthData);
                         temp.tableData = data.data;
-                        // console.log(tableData);
-                        // this.tableData=data.data.healthData;
-                        // console.log(tableData[0]);
                         alertMessage('温馨提醒: 上下可滑动');
                         temp.loading = false;
+                        var beforePercentage=temp.tableData.length;
+                        temp.percentage=beforePercentage * (100 / 30).toFixed(0);
                     })
                     .catch(function (error) {
                         console.log(error);
