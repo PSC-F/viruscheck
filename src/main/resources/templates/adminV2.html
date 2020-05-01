@@ -14,9 +14,11 @@
     <el-container>
         <el-header>
             <el-row type="center">
-                <el-col :lg="{span:2,offset:8}" :xs="{span:1,offset:1}">
+                <el-col :lg="{span:1,offset:1}" :xs="{span:24,offset:0}">
+                    <el-tag type="warning">后台管理:</el-tag>
+                </el-col>
+                <el-col :lg="{span:1,offset:8}" :xs="{span:20,offset:4}">
                     <div class="block">
-                        <el-tag type="warning">采集助手后台管理:</el-tag>
                         <el-date-picker
                                 format="yyyy-MM-dd"
                                 value-format="yyyy-MM-dd"
@@ -28,8 +30,14 @@
                         </el-date-picker>
                     </div>
                 </el-col>
-                <el-col :lg="{span:16,offset:16}" :xs="{span:1,offset:16}">
+            </el-row>
+            <el-row>
+                <el-col :lg="{span:16,offset:16}" :xs="{span:1,offset:4}">
                     <el-button round type="success" size="mini" plain @click="submit">健康查询
+                    </el-button>
+                </el-col>
+                <el-col :lg="{span:16,offset:16}" :xs="{span:1,offset:10}">
+                    <el-button round type="danger" size="mini" plain @click="submitOtherQuery">未采查询
                     </el-button>
                 </el-col>
             </el-row>
@@ -40,7 +48,6 @@
                                 :data="tableData"
                                 style="width: 100%"
                                 size="mini"
-                                tooltip-effect="dark"
                                 max-height="500px"
                                 v-loading="loading"
                                 element-loading-text="玩命加载中"
@@ -66,10 +73,10 @@
                                     :formatter="formatter"
                             >
                             </el-table-column>
-<!--                            <el-table-column-->
-<!--                                    prop="sysdate"-->
-<!--                                    label="时间"-->
-<!--                            >-->
+                            <!--                            <el-table-column-->
+                            <!--                                    prop="sysdate"-->
+                            <!--                                    label="时间"-->
+                            <!--                            >-->
                             </el-table-column>
                             <el-table-column label="操作">
                                 <template slot-scope="scope">
@@ -90,14 +97,14 @@
                                 <el-image style="width: 90%;
                                           height: 90%"
                                           v-bind:src="src"
-                                          ></el-image>
+                                ></el-image>
                             </template>
                         </el-dialog>
                     </template>
                     <el-footer height="500px">
-                        <el-progress :percentage="percentage" :format="formatWithPercentage" status="success"></el-progress>
-                        <el-button round type="danger" size="mini" plain @click="submitOtherQuery">未登记查询
-                        </el-button>
+                        <el-progress :percentage="percentage" :format="formatWithPercentage"
+                                     status="success"></el-progress>
+
                     </el-footer>
 
                 </el-col>
@@ -116,132 +123,133 @@
 <script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
 <script>
     var day;
-function dateFormat(fmt, date) {
-    let ret;
-    const opt = {
-        "Y+": date.getFullYear().toString(),        // 年
-        "m+": (date.getMonth() + 1).toString(),     // 月
-        "d+": date.getDate().toString(),            // 日
-        "H+": date.getHours().toString(),           // 时
-        "M+": date.getMinutes().toString(),         // 分
-        "S+": date.getSeconds().toString()          // 秒
-        // 有其他格式化字符需求可以继续添加，必须转化成字符串
-    };
-    for (let k in opt) {
-        ret = new RegExp("(" + k + ")").exec(fmt);
-        if (ret) {
-            fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+
+    function dateFormat(fmt, date) {
+        let ret;
+        const opt = {
+            "Y+": date.getFullYear().toString(),        // 年
+            "m+": (date.getMonth() + 1).toString(),     // 月
+            "d+": date.getDate().toString(),            // 日
+            "H+": date.getHours().toString(),           // 时
+            "M+": date.getMinutes().toString(),         // 分
+            "S+": date.getSeconds().toString()          // 秒
+            // 有其他格式化字符需求可以继续添加，必须转化成字符串
+        };
+        for (let k in opt) {
+            ret = new RegExp("(" + k + ")").exec(fmt);
+            if (ret) {
+                fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+            }
+            ;
         }
         ;
+        return fmt;
     }
-    ;
-    return fmt;
-}
 
-new Vue({
-    el: '#app',
-    data: {
-        value1: '',
-        tableData: [],
-        loading: false,
-        dialogTableVisible:false,
-        src:'test',
-        percentage:0,
-        defaultDate:new Date()
-        ,
-    }
-    , methods: {
-        formatWithPercentage(percentage) {
-            return percentage === 100 ? '采集完成' : `${percentage}%正在采集`;
+    new Vue({
+        el: '#app',
+        data: {
+            value1: '',
+            tableData: [],
+            loading: false,
+            dialogTableVisible: false,
+            src: 'test',
+            percentage: 0,
+            defaultDate: new Date()
+            ,
         }
-        ,
-        handleEdit(index, row) {
-            var temp = this;
-          this.dialogTableVisible = true;
-            axios.post('/selectQrCodeByDayWithXh', {day: day,xh:row.xh.toString()}).then(function (data) {
-               temp.src=data.data.qrcode;
-               console.log(this.src);
-            });
-            this.dialogFormVisible=true;
-            // console.log(xh, sysDate);
-        },
-        tableRowClassName({row, rowIndex}) {
-            if (row.state === "1") {
-                return 'success-row';
-            } else if (row.state === "3" || row.state === "2") {
-                return 'warning-row';
+        , methods: {
+            formatWithPercentage(percentage) {
+                return percentage === 100 ? '采集完成' : `${percentage}%正在采集`;
             }
-            return '';
-        },
-        formatter(row, column) {
-            if (row.state === "1") {
-                return "绿码"
-            } else if (row.state === "2") {
-                return "黄码";
-            } else if(row.state === "3"){
-                return "红码";
-            }else {
-                return "未采集"
-            }
-        },
-        selectTime: function (value1) {
-            day = value1
-        },
-        submitOtherQuery:function () {
-            var temp = this;
-            temp.loading = true;
-            if(day==null){
-                alert("请先选择日期");
-                temp.loading = false;
-                return;
-            }
-            axios.post('/selectHealthByDayWithOther', {day: day})
-                .then(function (data) {
-                    console.log("获取数据");
-                    // var jsonObj = JSON.parse(JSON.stringify(successResponse.data.data));
-                    // var data2=  eval(data.data.healthData);
-                    temp.tableData = data.data;
-                    // console.log(tableData);
-                    // this.tableData=data.data.healthData;
-                    // console.log(tableData[0]);
-                    alertMessage('温馨提醒: 上下可滑动');
+            ,
+            handleEdit(index, row) {
+                var temp = this;
+                this.dialogTableVisible = true;
+                axios.post('/selectQrCodeByDayWithXh', {day: day, xh: row.xh.toString()}).then(function (data) {
+                    temp.src = data.data.qrcode;
+                    console.log(this.src);
+                });
+                this.dialogFormVisible = true;
+                // console.log(xh, sysDate);
+            },
+            tableRowClassName({row, rowIndex}) {
+                if (row.state === "1") {
+                    return 'success-row';
+                } else if (row.state === "3" || row.state === "2") {
+                    return 'warning-row';
+                }
+                return '';
+            },
+            formatter(row, column) {
+                if (row.state === "1") {
+                    return "绿码"
+                } else if (row.state === "2") {
+                    return "黄码";
+                } else if (row.state === "3") {
+                    return "红码";
+                } else {
+                    return "未采集"
+                }
+            },
+            selectTime: function (value1) {
+                day = value1
+            },
+            submitOtherQuery: function () {
+                var temp = this;
+                temp.loading = true;
+                if (day == null) {
+                    alert("请先选择日期");
                     temp.loading = false;
-                    var beforePercentage=temp.tableData.length;
-                    temp.percentage=beforePercentage * (100 / 30).toFixed(0);
-                })
-                .catch(function (error) {
-                    console.log(error);
-                    console.log("不存在");
-                });
-            var notify = this.$notify;
+                    return;
+                }
+                axios.post('/selectHealthByDayWithOther', {day: day})
+                    .then(function (data) {
+                        console.log("获取数据");
+                        // var jsonObj = JSON.parse(JSON.stringify(successResponse.data.data));
+                        // var data2=  eval(data.data.healthData);
+                        temp.tableData = data.data;
+                        // console.log(tableData);
+                        // this.tableData=data.data.healthData;
+                        // console.log(tableData[0]);
+                        alertMessage('温馨提醒: 上下可滑动');
+                        temp.loading = false;
+                        var beforePercentage = temp.tableData.length;
+                        temp.percentage = beforePercentage * (100 / 30).toFixed(0);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        console.log("不存在");
+                    });
+                var notify = this.$notify;
 
-            function alertMessage(title, message, type) {
-                notify({
-                    title: title,
-                    message: message,
-                    type: type,
-                    duration: 3000,
-                    position: 'bottom-right',
-                    offset: 100
-                });
-            }
-        },
-        submit: function () {
-            var temp = this;
-            temp.loading = true;
-           if(day==null){
-               alert("请先选择日期");
-               temp.loading = false;
-               return;
-           }
+                function alertMessage(title, message, type) {
+                    notify({
+                        title: title,
+                        message: message,
+                        type: type,
+                        duration: 3000,
+                        position: 'bottom-right',
+                        offset: 100
+                    });
+                }
+            },
+            submit: function () {
+                var temp = this;
+                temp.loading = true;
+                if (day == null) {
+                    alert("请先选择日期");
+                    temp.loading = false;
+                    return;
+                }
                 axios.post('/selectHealthByDay', {day: day})
                     .then(function (data) {
                         console.log("获取数据");
                         temp.tableData = data.data;
                         alertMessage('温馨提醒: 上下可滑动');
                         temp.loading = false;
-                        var beforePercentage=temp.tableData.length;
-                        temp.percentage=beforePercentage * (100 / 30).toFixed(0);
+                        var beforePercentage = temp.tableData.length;
+                        temp.percentage = beforePercentage * (100 / 30).toFixed(0);
                     })
                     .catch(function (error) {
                         console.log(error);
@@ -263,7 +271,7 @@ new Vue({
             }
         }
 
-})
+    })
 
 </script>
 <style>
@@ -272,16 +280,66 @@ new Vue({
     }
 
     .el-table .success-row {
-        background: #f0f9eb;
+        background: #141d26;
+        border-color: #141d26;
+    }
+
+    .el-table th, .el-table tr {
+        background-color: #243447;
+    }
+
+    .el-table__empty-block {
+        background-color: #243447;
+    }
+
+
+    .el-input {
+        background-color: #243447;
+        border: #243447;
+    }
+
+    .el-input--prefix {
+        background-color: #243447;
+        border: #243447;
+    }
+
+    .el-input--suffix {
+        background-color: #243447;
+        border: #243447;
+    }
+
+    .el-date-editor--date {
+        background-color: #243447;
+        border: #243447;
+    }
+
+    .el-picker-panel__body {
+        background-color: #243447;
+        border: #243447;
+    }
+
+    .el-picker-panel__body-wrapper {
+        background-color: #243447;
+        border: #243447;
+    }
+
+    .el-date-editor {
+        background-color: #243447;
+        border: #243447;
+    }
+
+    .el-input__inner {
+        background-color: #243447;
+        border: #243447;
     }
 
     .el-row {
-        padding: 5px;
+        margin-top: 20px;
     }
 
     #app {
 
-
+        background-color: #141d26;
         height: 100%;
 
         width: 100%;
@@ -303,13 +361,6 @@ new Vue({
         -webkit-font-smoothing: antialiased;
     }
 
-    .el-main {
-        margin-top: 150px;
 
-    }
-
-    .el-button {
-        margin-top: 50px;
-    }
 </style>
 </html>
