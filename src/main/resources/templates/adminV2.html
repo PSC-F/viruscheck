@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
+    <title>疫情上报系统-管理员</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!--    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
+    <script src="https://cdn.bootcss.com/axios/0.19.0/axios.js"></script>
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header>
+            <el-row type="center">
+                <el-col :lg="{span:2,offset:8}" :xs="{span:1,offset:1}">
+                    <div class="block">
+                        <el-tag type="warning">采集助手后台管理:</el-tag>
+                        <el-date-picker
+                                format="yyyy-MM-dd"
+                                value-format="yyyy-MM-dd"
+                                @change="selectTime"
+                                v-model="value1"
+                                type="date"
+                                placeholder="选择日期">
+                        </el-date-picker>
+                    </div>
+                </el-col>
+                <el-col :lg="{span:16,offset:16}" :xs="{span:1,offset:16}">
+                    <el-button round type="success" size="mini" plain @click="submit">健康查询
+                    </el-button>
+                </el-col>
+            </el-row>
+            <el-row type="center">
+                <el-col :lg="{span:24,offset:0}" :xs="{span:24,offset:0}">
+                    <template>
+                        <el-table
+                                :data="tableData"
+                                style="width: 100%"
+                                size="mini"
+                                tooltip-effect="dark"
+                                max-height="500px"
+                                v-loading="loading"
+                                element-loading-text="玩命加载中"
+                                element-loading-spinner="el-icon-loading"
+                                element-loading-background="rgba(0, 0, 0, 0.8)"
+                                :row-class-name="tableRowClassName"
+                        >
+                            <el-table-column
+                                    prop="xh"
+                                    label="学号"
+                            >
+
+                            </el-table-column>
+                            <el-table-column
+                                    prop="name"
+                                    label="姓名"
+                            >
+
+                            </el-table-column>
+                            <el-table-column
+                                    prop="state"
+                                    label="状态"
+                                    :formatter="formatter"
+                            >
+                            </el-table-column>
+<!--                            <el-table-column-->
+<!--                                    prop="sysdate"-->
+<!--                                    label="时间"-->
+<!--                            >-->
+                            </el-table-column>
+                            <el-table-column label="操作">
+                                <template slot-scope="scope">
+                                    <el-button
+                                            round
+                                            size="mini"
+                                            type="primary"
+                                            @click="handleEdit(scope.$index, scope.row)">查看
+                                    </el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                        <el-dialog
+                                title="健康码" :visible.sync="dialogTableVisible"
+                                width="50%"
+                        >
+                            <template slot-scope="scope">
+                                <el-image style="width: 90%;
+                                          height: 90%"
+                                          v-bind:src="src"
+                                          ></el-image>
+                            </template>
+                        </el-dialog>
+                    </template>
+                    <el-footer height="500px">
+                        <el-button round type="danger" size="mini" plain @click="submitOtherQuery">未登记查询
+                        </el-button>
+                    </el-footer>
+
+                </el-col>
+            </el-row>
+        </el-header>
+        </el-main>
+    </el-container>
+
+</div>
+</body>
+<!-- import Vue before Element -->
+<!--<script src="https://unpkg.com/vue/dist/vue.js"></script>-->
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.common.dev.js"></script>
+<!-- import JavaScript -->
+<!--<script src="https://unpkg.com/element-ui/lib/index.js"></script>-->
+<script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
+<script>
+    var day;
+function dateFormat(fmt, date) {
+    let ret;
+    const opt = {
+        "Y+": date.getFullYear().toString(),        // 年
+        "m+": (date.getMonth() + 1).toString(),     // 月
+        "d+": date.getDate().toString(),            // 日
+        "H+": date.getHours().toString(),           // 时
+        "M+": date.getMinutes().toString(),         // 分
+        "S+": date.getSeconds().toString()          // 秒
+        // 有其他格式化字符需求可以继续添加，必须转化成字符串
+    };
+    for (let k in opt) {
+        ret = new RegExp("(" + k + ")").exec(fmt);
+        if (ret) {
+            fmt = fmt.replace(ret[1], (ret[1].length == 1) ? (opt[k]) : (opt[k].padStart(ret[1].length, "0")))
+        }
+        ;
+    }
+    ;
+    return fmt;
+}
+
+new Vue({
+    el: '#app',
+    data: {
+        value1: "",
+        tableData: [],
+        loading: false,
+        dialogTableVisible:false,
+        src:'test',
+    }
+    , methods: {
+        handleEdit(index, row) {
+            var temp = this;
+          this.dialogTableVisible = true;
+            axios.post('/selectQrCodeByDayWithXh', {day: day,xh:row.xh.toString()}).then(function (data) {
+               temp.src=data.data.qrcode;
+               console.log(this.src);
+            });
+            this.dialogFormVisible=true;
+            // console.log(xh, sysDate);
+        },
+        tableRowClassName({row, rowIndex}) {
+            if (row.state === "1") {
+                return 'success-row';
+            } else if (row.state === "3" || row.state === "2") {
+                return 'warning-row';
+            }
+            return '';
+        },
+        formatter(row, column) {
+            if (row.state === "1") {
+                return "绿码"
+            } else if (row.state === "2") {
+                return "黄码";
+            } else if(row.state === "3"){
+                return "红码";
+            }else {
+                return "未采集"
+            }
+        },
+        selectTime: function (value1) {
+            day = value1
+        },
+        submitOtherQuery:function () {
+            var temp = this;
+            temp.loading = true;
+            if(day==null){
+                alert("请先选择日期");
+                temp.loading = false;
+                return;
+            }
+            axios.post('/selectHealthByDayWithOther', {day: day})
+                .then(function (data) {
+                    console.log("获取数据");
+                    // var jsonObj = JSON.parse(JSON.stringify(successResponse.data.data));
+                    // var data2=  eval(data.data.healthData);
+                    temp.tableData = data.data;
+                    // console.log(tableData);
+                    // this.tableData=data.data.healthData;
+                    // console.log(tableData[0]);
+                    alertMessage('温馨提醒: 上下可滑动');
+                    temp.loading = false;
+                })
+                .catch(function (error) {
+                    console.log(error);
+                    console.log("不存在");
+                    alertMessage('查询成功,表格可以滚动');
+                });
+            var notify = this.$notify;
+
+            function alertMessage(title, message, type) {
+                notify({
+                    title: title,
+                    message: message,
+                    type: type,
+                    duration: 3000,
+                    position: 'bottom-right',
+                    offset: 100
+                });
+            }
+        },
+        submit: function () {
+            var temp = this;
+            temp.loading = true;
+           if(day==null){
+               alert("请先选择日期");
+               temp.loading = false;
+               return;
+           }
+                axios.post('/selectHealthByDay', {day: day})
+                    .then(function (data) {
+                        console.log("获取数据");
+                        // var jsonObj = JSON.parse(JSON.stringify(successResponse.data.data));
+                        // var data2=  eval(data.data.healthData);
+                        temp.tableData = data.data;
+                        // console.log(tableData);
+                        // this.tableData=data.data.healthData;
+                        // console.log(tableData[0]);
+                        alertMessage('温馨提醒: 上下可滑动');
+                        temp.loading = false;
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        console.log("不存在");
+                        alertMessage('查询成功,表格可以滚动');
+                    });
+                var notify = this.$notify;
+
+                function alertMessage(title, message, type) {
+                    notify({
+                        title: title,
+                        message: message,
+                        type: type,
+                        duration: 3000,
+                        position: 'bottom-right',
+                        offset: 100
+                    });
+                }
+            }
+        }
+
+})
+
+</script>
+<style>
+    .el-table .warning-row {
+        background: oldlace;
+    }
+
+    .el-table .success-row {
+        background: #f0f9eb;
+    }
+
+    .el-row {
+        padding: 5px;
+    }
+
+    #app {
+
+
+        height: 100%;
+
+        width: 100%;
+
+        overflow: hidden;
+
+        background-size: cover;
+
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        font: 14px/1.5 tahoma, arial, 'Hiragino Sans GB', '\5b8b\4f53', sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .el-main {
+        margin-top: 150px;
+
+    }
+
+    .el-button {
+        margin-top: 50px;
+    }
+</style>
+</html>

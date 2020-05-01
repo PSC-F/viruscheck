@@ -14,6 +14,31 @@ public class TbTempEntity {
     private Date sysDate;
     private String studentId;
 
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
+    @Basic
+    @Column(name = "qrcode")
+    private String qrCode;
+    @Basic
+    @Column(name = "state")
+    private String state;
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public TbTempEntity() {
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
@@ -24,7 +49,6 @@ public class TbTempEntity {
     public void setId(int id) {
         this.id = id;
     }
-
     @Basic
     @Column(name = "tempAM")
     public String getTempAm() {

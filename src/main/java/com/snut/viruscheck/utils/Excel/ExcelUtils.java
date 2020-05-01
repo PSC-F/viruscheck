@@ -169,7 +169,7 @@ public class ExcelUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        d.setHours(d.getHours() + 25);//防止bug.查询需要打一天才能查出结果.暂时这么修复
+        d.setHours(d.getHours());//防止bug.查询需要打一天才能查出结果.暂时这么修复
         java.sql.Date date = new java.sql.Date(d.getTime());
         return date;
     }

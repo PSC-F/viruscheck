@@ -24,6 +24,7 @@ public class TbStudentEntity {
         this.id = id;
     }
 
+
     @Basic
     @Column(name = "name")
     public String getName() {

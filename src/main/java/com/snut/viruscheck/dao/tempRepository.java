@@ -1,7 +1,6 @@
 package com.snut.viruscheck.dao;
 
 import com.snut.viruscheck.entity.TbTempEntity;
-import com.snut.viruscheck.entity.dto.ExcelTemp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

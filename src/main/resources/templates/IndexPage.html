@@ -4,17 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no">
-    <title>疫情上报系统</title>
+    <title>绿码收集</title>
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <!--    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>-->
     <script src="https://cdn.bootcss.com/axios/0.19.0/axios.js"></script>
+
 </head>
 <body>
 <div id="app">
     <el-container>
         <el-header>
-            <el-tag type="danger">疫情上报系统</el-tag>
-            <el-tag type="warning">早睡早起、注意防护</el-tag>
+            <el-tag type="danger">疫情上报系统V2-健康码采集助手</el-tag>
+            <el-button size="small" @click="queryHealth" type="danger" icon="el-icon-setting">进入后台管理中心</el-button>
+
             <!--            <el-tag-->
             <!--                    v-for="item in items"-->
             <!--                    :key="item.label"-->
@@ -24,42 +26,103 @@
             <!--            </el-tag>-->
         </el-header>
         <el-main>
-            <div class="main">
-                <el-row justify="center">
-                    <el-col :lg="{span:4,offset:10}" :xs="{span:16,offset:4}">
-                        <el-input v-model="newStudent.id" placeholder="请输入">
-                            <template slot="prepend">学号</template>
-                        </el-input>
+
+            <el-row justify="center">
+                <el-col :lg="{span:8,offset:10}" :xs="{span:24,offset:2}">
+                    <lable class="el-icon-upload" style="font-family: 'Dubai Light';font-size: xx-large;color: #303133">
+                        健康码采集助手
+                    </lable>
+                </el-col>
+            </el-row>
+            <el-row justify="center">
+                <el-col :lg="{span:4,offset:10}" :xs="{span:15,offset:4}">
+                    <el-input v-model="newStudent.id" placeholder="请输入">
+                        <template slot="prepend">学号</template>
+                    </el-input>
+                </el-col>
+                <!--                </el-row>-->
+                <!--                <el-row>-->
+                <!--                    <el-col :lg="{span:4,offset:10}" :xs="{span:16,offset:4}">-->
+                <!--                        <el-input v-model="newStudent.tempAM" placeholder="上午">-->
+                <!--                            <template slot="prepend">体温</template>-->
+                <!--                            <template slot="append">℃</template>-->
+                <!--                        </el-input>-->
+                <!--                    </el-col>-->
+                <!--                </el-row>-->
+                <!--                <el-row>-->
+                <!--                    <el-col :lg="{span:4,offset:10}" :xs="{span:16,offset:4}">-->
+                <!--                        <el-input v-model="newStudent.tempPM" placeholder="下午">-->
+                <!--                            <template slot="prepend">体温</template>-->
+                <!--                            <template slot="append">℃</template>-->
+                <!--                        </el-input>-->
+                <!--                        <el-tag type="success">例如36.5</el-tag>-->
+                <!--                    </el-col>-->
+                <!--                </el-row>-->
+                <!--                <el-row>-->
+                <!--                    <el-col :lg="{span:4,offset:10}" :xs="{span:16,offset:4}">-->
+                <!--                        <el-input :rows="6" type="textarea" v-model="newStudent.des" placeholder="若有不适请描述情况"></el-input>-->
+                <!--                        <el-tag type="danger">若超过37.3℃</el-tag>-->
+                <!--                    </el-col>-->
+            </el-row>
+            <el-row>
+
+                <el-row>
+                    <el-col :lg="{span:4,offset:10}" :xs="{span:20,offset:4}">
+                        <template>
+                            <el-radio-group v-model="radio">
+                                <el-radio :label="1" style="color: #67C23A;font-family: 'Dubai Light';">绿码</el-radio>
+                                <el-radio :label="2" style="color:#E6A23C;font-family: 'Dubai Light';">黄码</el-radio>
+                                <el-radio :label="3" style="color:#F56C6C;font-family: 'Dubai Light';">红码</el-radio>
+                            </el-radio-group>
+                        </template>
                     </el-col>
                 </el-row>
                 <el-row>
-                    <el-col :lg="{span:4,offset:10}" :xs="{span:16,offset:4}">
-                        <el-input v-model="newStudent.tempAM" placeholder="上午">
-                            <template slot="prepend">体温</template>
-                            <template slot="append">℃</template>
-                        </el-input>
+                    <el-col :lg="{span:4,offset:10}" :xs="{span:20,offset:0}">
+                        <template>
+                            <el-form :model="editForm" label-width="80px" ref="editForm">
+                                <el-row :lg="{span:4,offset:10}">
+                                    <el-tag size="mini" closable>健康码</el-tag>
+                                    <el-badge :value="1" class="item"/>
+                                    <el-form-item prop="posters">
+                                        <el-upload
+                                                action="abc"
+                                                multiple
+                                                accept="image/png, image/jpeg"
+                                                :accept="'image/*'"
+                                                list-type="picture-card"
+                                                :before-upload="beforeUploadPicture"
+                                                :on-change="handlePictureRemove"
+                                                :on-preview="handlePictureCardPreview"
+                                                :on-remove="handleRemove"
+                                                :on-success="uploadImgSuccess"
+                                                :http-request="uploadImg"
+                                                :file-list="editForm.posterList"
+                                                :limit="2"
+                                                v-loading="loading"
+                                                element-loading-text="网络有不确定因素,请耐心等待"
+                                                element-loading-spinner="el-icon-loading"
+                                                element-loading-background="rgba(0, 0, 0, 0.8)"
+                                        >
+                                            <i class="el-icon-plus"></i>
+                                        </el-upload>
+                                    </el-form-item>
+                                    <el-dialog class="preview-modal" :visible.sync="imgVisible" append-to-body>
+                                        <img width="100%" :src="dialogImageUrl" alt="photo">
+                                    </el-dialog>
+                                </el-row>
+                            </el-form>
+                        </template>
                     </el-col>
                 </el-row>
-                <el-row>
-                    <el-col :lg="{span:4,offset:10}" :xs="{span:16,offset:4}">
-                        <el-input v-model="newStudent.tempPM" placeholder="下午">
-                            <template slot="prepend">体温</template>
-                            <template slot="append">℃</template>
-                        </el-input>
-                        <el-tag type="success">例如36.5</el-tag>
-                    </el-col>
-                </el-row>
-                <el-row>
-                    <el-col :lg="{span:4,offset:10}" :xs="{span:16,offset:4}">
-                        <el-input :rows="6" type="textarea" v-model="newStudent.des" placeholder="若有不适请描述情况"></el-input>
-                        <el-tag type="danger">若超过37.3℃</el-tag>
-                    </el-col>
-                </el-row>
-                <el-row type="flex" class="row-bg" justify="center">
-                    <el-button round type="success" size="medium" plain @click="submit">上报信息
-                    </el-button>
-                </el-row>
-            </div>
+
+            </el-row>
+            <!--                        <el-row type="flex" class="row-bg" justify="center">-->
+            <!--                            <el-button round type="success" size="medium" plain @click="submit">发送情报-->
+            <!--                            </el-button>-->
+            <!--                        </el-row>-->
+            </el-row>
+
         </el-main>
 
     </el-container>
@@ -72,9 +135,12 @@
 <!--<script src="https://unpkg.com/element-ui/lib/index.js"></script>-->
 <script src="https://cdn.bootcss.com/element-ui/2.12.0/index.js"></script>
 <script>
+
+
     new Vue({
         el: '#app',
         data: {
+            radio: "1",
             isDisabl: true,
             newStudent: {
                 id: '',
@@ -84,26 +150,111 @@
             },
             items:
                 {type: 'warning', label: 0}
-
+            , editForm: {
+                posterList: [],
+            },
+            imgVisible: false,
+            dialogImageUrl: '',
+            loading: false,
+            imgQuality: 0.2,
         },
-
-        // beforeCreate: function () {
-        //     axios.get('http://www.dzyong.top:3005/yiqing/total').then(function (response) {
-        //
-        //         this.items = {
-        //             label: response.data.data[0].death
-        //         // suspect: response.data.data[0].suspect,
-        //         // death: response.data.data[0].death,
-        //         // cured: response.data.data[0].cured
-        //     }
-        //         ;
-        // var jsonData = JSON.stringify(response.data);
-        // alert(JSON.stringify(temp));
-
-        // {"data":[{"id":1,"diagnosed":68584,"suspect":8228,"death":1666,"cured":9547,"date":"2020-02-16 14:41:17"}]}
-        // })
-        // },
         methods: {
+            dataURItoBlob(dataURI, type) {
+                var binary = atob(dataURI.split(',')[1]);
+                var array = [];
+                for (var i = 0; i < binary.length; i++) {
+                    array.push(binary.charCodeAt(i));
+                }
+                return new Blob([new Uint8Array(array)], {type: type});
+            },
+            //上传图片前-可以将自定义上传写在这里,并在最后return false
+            beforeUploadPicture(file) {
+                if (file.size > 800 * 1024) {
+                    this.$message.error("上传图片不能大于800kB");
+                    return false;
+                }
+                const _this = this;
+                return new Promise(resolve => {
+                    const reader = new FileReader();
+                    const image = new Image();
+                    image.onload = (imageEvent) => {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        const width = image.width * _this.imgQuality;
+                        const height = image.height * _this.imgQuality;
+                        canvas.width = width;
+                        canvas.height = height;
+                        context.clearRect(0, 0, width, height);
+                        context.drawImage(image, 0, 0, width, height);
+                        const dataUrl = canvas.toDataURL(file.type);
+                        const blobData = _this.dataURItoBlob(dataUrl, File.type);
+                        resolve(blobData)
+                    }
+                    reader.onload = (e => {
+                        image.src = e.target.result;
+                    });
+                    reader.readAsDataURL(file);
+                })
+            },
+            queryHealth() {
+                window.location.href = "http://yct.concat.top/adminManageV2"
+            }
+            ,
+            //自定义上传方法
+            uploadImg(item) {
+                var _this = this;
+                let that = this;
+                let fd = new FormData();
+                fd.append('file', item.file);
+                fd.append('fid', this.newStudent.id.toString());
+                fd.append('fileType', 'image');
+                fd.append('healthStatus', this.radio);
+                _this.loading = true;
+                axios.post('/postData', fd)
+                    .then(function (response) {
+                        _this.loading = false;
+                        alert(response.data.success);
+                    })
+                    .catch(function (error) {
+                        console.log(error);
+                        console.log("不存在");
+                        alertMessage('信息错误', '请检查学号', 'error');
+                    });
+                // API.upload(fd).then((res) =>{//调用API上传图片,这里人比较懒,就懒得写测试数据了,看看效果和要点就行了
+                //     item.onSuccess(res)//重新绑定onSuccess,否则不能获取到fileList,!!这里的res会作为fileList数组的元素,所以res是什么格式的数据,fileList就会是什么格式的数据组成的数组
+                // }, (err) => {
+                //     console.log(error);
+                //     that.$message.error({showClose: true, message: err.toString(), duration: 2000});
+                // }).catch(function (error) {
+                //     console.log(error);
+                //     that.$message.error({showClose: true, message: '上传出现异常', duration: 2000});
+                // });
+            },
+            handleRemove(file, fileList) {
+                this.fileChange(fileList)
+            },
+            uploadImgSuccess(file, fileList) {
+                console.log('file', file)
+            },
+            handlePictureRemove(file, fileList) {
+                this.fileChange(fileList)
+            },
+            //重新生成fileList
+            fileChange(fileList) {
+                let temp = [];
+                if (fileList) {
+                    if (fileList.length > 0) {
+                        for (let i = 0; i < fileList.length; i++) {
+                            temp.push(fileList[i].response)//承接上面绑定onSuccess,因为图片的url是直接作为response传回来的,所以这里要push的是response,而不是一般其他人给的例子里的url
+                        }
+                    }
+                }
+                this.editForm.posters = temp;
+            },
+            handlePictureCardPreview(file) {
+                this.dialogImageUrl = file.url;
+                this.imgVisible = true;
+            },
             temp: '',
             submit: function () {
                 this.newStudent = {
@@ -139,9 +290,82 @@
                         console.log("不存在");
                         alertMessage('信息错误', '请检查学号', 'error');
                     });
-            }
+            }, handleRemove(file, fileList) {
+                console.log(file, fileList);
+            },
+            handlePreview(file) {
+                console.log(file);
+            },
+            handleExceed(files, fileList) {
+                this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+            },
+            beforeRemove(file, fileList) {
+                return this.$confirm(`确定移除 ${file.name}？`);
+            },
         },
-    })
+    });
+
+    //
+    //
+    // new Vue({
+    //     el: '#app',
+    //     data: {
+    //         radio: 1,
+    //         isDisabl: true,
+    //         newStudent: {
+    //             id: '',
+    //             tempAM: '',
+    //             tempPM: '',
+    //             des: ''
+    //         },
+    //         fileList: [],
+    //         actionUrl: `${process.env.baseURL}/api/file/upload`,
+    //         fileReader: '',
+    //         items:
+    //             {type: 'warning', label: 0}
+    //
+    //     },
+    //     methods: {
+    //         temp: '',
+    //         submit: function () {
+    //             this.newStudent = {
+    //                 id: this.newStudent.id,
+    //                 tempAM: this.newStudent.tempAM,
+    //                 tempPM: this.newStudent.tempPM,
+    //                 des: this.newStudent.des
+    //             };
+    //             console.log(this.newStudent.id);
+    //             console.log(this.newStudent.tempAM);
+    //             console.log(this.newStudent.tempPM);
+    //             console.log(this.newStudent.des);
+    //             var notify = this.$notify;
+    //
+    //             function alertMessage(title, message, type) {
+    //                 notify({
+    //                     title: title,
+    //                     message: message,
+    //                     type: type,
+    //                     duration: 3000,
+    //                     position: 'bottom-right',
+    //                     offset: 100
+    //                 });
+    //             }
+    //
+    //             axios.post('/updateInfo', this.newStudent)
+    //                 .then(function (response) {
+    //                     console.log("成功");
+    //                     alertMessage('上报成功', '谢谢配合', 'success')
+    //                 })
+    //                 .catch(function (error) {
+    //                     console.log(error);
+    //                     console.log("不存在");
+    //                     alertMessage('信息错误', '请检查学号', 'error');
+    //                 });
+    //         }
+    //     },
+    // });
+
+
 </script>
 <style>
     .el-row {
@@ -150,7 +374,7 @@
 
     #app {
 
-        background: url('http://chuantu.xyz/t6/720/1581952935x2890149663.jpg');
+        background-color: #909399;
 
         height: 100%;
 
